@@ -8,10 +8,29 @@
 # ...files. Content size is reduced by throwing out risk="None" and risk="Info" rows and mapping duplicate values to a hash table stored in <mappings.json>.
 # Usage: $ python <path_to_file>
 import csv
+import getopt
 import json
 import sys
 
-file_path = sys.argv[1]
+# reads in command line arguments:
+input_file = None
+output_path = './'
+try:
+    opts, args = getopt.getopt(sys.argv[1:], 'hi:o:', ['help', 'input-file=', 'output-directory='])
+except getopt.GetoptError:
+    print 'Error: Invalid usage.\n\tnessus-parse.py -i <input_file> -o <output_directory>'
+    sys.exit(2)
+for opt, arg in opts:
+    if opt == '-h':
+        print 'Usage:\n\tnessus-parse.py -i <input_file> -o <output_directory>'
+        sys.exit(0)
+    elif opt in [ '-i', '--input-file' ]:
+        input_file = arg
+    elif opt in [ '-o', '--output-directory' ]:
+        output_path = arg
+if input_file is None:
+    print '\tERROR: Please specify an input file.\n\tUse --help for details.'
+    sys.exit(1)
 output = {
     0: 'Done.',
     1: 'Error opening file.',
@@ -19,19 +38,19 @@ output = {
     3: 'Error transforming input CSV file.'
 }
 # attempts to open the file at the provided path:
-def main(file_path):
+def main(input_file):
     try:
-        scan_file = open(file_path, 'r') # open input file in read mode, line-buffered
+        scan_file = open(input_file, 'r') # open input file in read mode, line-buffered
         scan_reader = csv.reader(scan_file)
-        medium_file = open('./sandbox/medium.csv', 'w', 1)
+        medium_file = open(output_path + 'medium.csv', 'w', 1)
         medium_writer = csv.writer(medium_file)
-        high_file = open('./sandbox/high.csv', 'w', 1)
+        high_file = open(output_path + 'high.csv', 'w', 1)
         high_writer = csv.writer(high_file)
-        critical_file = open('./sandbox/critical.csv', 'w', 1)
+        critical_file = open(output_path + 'critical.csv', 'w', 1)
         critical_writer = csv.writer(critical_file)
-        summary_file = open('./sandbox/summary.csv', 'w', 1)
+        summary_file = open(output_path + 'summary.csv', 'w', 1)
         summary_writer = csv.writer(summary_file)
-        mappings_file = open('./sandbox/mappings.json', 'w', 1)
+        mappings_file = open(output_path + 'mappings.json', 'w', 1)
     except IOError as e:
         print e
         return 1
@@ -122,8 +141,17 @@ def main(file_path):
         for key in summary:
             summary[key]['hosts'] = len(summary[key]['hosts'])
             summary_writer.writerow([ summary[key]['count'], key, summary[key]['hosts'] ])
+        # convertes python special characters to an escaped format:
+        for plugin_ID in mappings:
+            for field in mappings[plugin_ID]:
+                mappings[plugin_ID][field] = mappings[plugin_ID][field] \
+                    .replace('\\', r'\\') \
+                    .replace('\n', r'\\n') \
+                    .replace('\r', r'\\n') \
+                    .replace('\t', r'\\t') \
+                    .replace('\"', r'\"')
         # converts mapping dict to JSON and writes to mappings.json file:
-        mappings_file.write(json.dumps(mappings).replace('\\n', '\\\\n'))
+        mappings_file.write(json.dumps(mappings))
         # cleans up:
         scan_file.close()
         medium_file.close()
@@ -133,7 +161,7 @@ def main(file_path):
         mappings_file.close()
         return 0
 
-
-code = main(file_path)
+code = main(input_file)
 print output[code]
 sys.exit(code)
+
