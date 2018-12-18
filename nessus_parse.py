@@ -109,7 +109,7 @@ def main(input_file):
                            'Name': row[column_indicies['Name']],
                            'Synopsis': row[column_indicies['Synopsis']],
                            'Description': row[column_indicies['Description']],
-                           'Plugin Output': row[column_indicies['Plugin Output']]
+                           'Solution': row[column_indicies['Solution']]
                         }
                 # separates rows into separate files by risk level
                 # AND records host summary counts:
