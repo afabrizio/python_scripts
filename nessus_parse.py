@@ -42,15 +42,15 @@ def main(input_file):
     try:
         scan_file = open(input_file, 'r') # open input file in read mode, line-buffered
         scan_reader = csv.reader(scan_file)
-        medium_file = open(output_path + 'medium.csv', 'w', 1)
-        medium_writer = csv.writer(medium_file)
-        high_file = open(output_path + 'high.csv', 'w', 1)
-        high_writer = csv.writer(high_file)
-        critical_file = open(output_path + 'critical.csv', 'w', 1)
-        critical_writer = csv.writer(critical_file)
-        summary_file = open(output_path + 'summary.csv', 'w', 1)
-        summary_writer = csv.writer(summary_file)
-        mappings_file = open(output_path + 'mappings.json', 'w', 1)
+        medium_file = open(output_path + 'medium.csv', 'wb', 1)
+        medium_writer = csv.writer(medium_file, dialect = 'excel')
+        high_file = open(output_path + 'high.csv', 'wb', 1)
+        high_writer = csv.writer(high_file, dialect = 'excel')
+        critical_file = open(output_path + 'critical.csv', 'wb', 1)
+        critical_writer = csv.writer(critical_file, dialect = 'excel')
+        summary_file = open(output_path + 'summary.csv', 'wb', 1)
+        summary_writer = csv.writer(summary_file, dialect = 'excel')
+        mappings_file = open(output_path + 'mappings.json', 'wb', 1)
     except IOError as e:
         print e
         return 1
